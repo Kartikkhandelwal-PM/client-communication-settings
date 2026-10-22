@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useSettings from './hooks/useSettings.js'
 import { KEYS, TABS } from './api/mockData.js'
 import { Icon, FilterButton, Pager, useToast } from './components/ui.jsx'
@@ -15,7 +15,9 @@ export default function App() {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(25)
   const [selected, setSelected] = useState(new Set())
-  const [toast, say] = useToast()
+  const [toast, show] = useToast()
+  const last = useRef({ msg: '', at: 0 })
+  const say = (msg) => { last.current = { msg: msg.endsWith('.') ? msg : '', at: Date.now() }; show(msg) }
 
   const clients = s.state?.clients ?? []
   const keys = KEYS.filter((x) => x.tab === tab)
@@ -55,11 +57,16 @@ export default function App() {
   const bulkSelected = (keyId, on) => {
     const n = s.setMany([...selected], keyId, on)
     const x = KEYS.find((k) => k.k === keyId)
-    say(`${x.name} turned ${on ? 'on' : 'off'} for ${n} of ${selected.size} selected clients.`)
+    const skipped = selected.size - n
+    say(`${x.name} turned ${on ? 'on' : 'off'} for ${n} clients.${skipped ? ` ${skipped} skipped, no ${x.ch === 'wa' ? 'mobile number' : 'email'}.` : ''}`)
   }
   // every change saves by itself; tell the user when it is done (or failed)
+  // the "Saved" note is added to the message of the action that caused it, so the message is not lost
   useEffect(() => {
-    if (s.saveInfo) say(s.saveInfo.error ? `Could not save: ${s.saveInfo.error}` : 'Saved')
+    if (!s.saveInfo) return
+    if (s.saveInfo.error) return say(`Could not save: ${s.saveInfo.error}`)
+    const recent = last.current.msg && Date.now() - last.current.at < 3000
+    say(recent ? `${last.current.msg} Saved.` : 'Saved')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.saveInfo])
   const addTest = () => {

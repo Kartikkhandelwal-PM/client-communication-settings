@@ -13,12 +13,12 @@ function columnState(key, rows) {
 export default function SettingsTable({ keys, rows, allRows, selected, onSelect, onSelectPage, onToggle, onEditContact, onInvalid, onToggleColumn }) {
   const allSel = rows.length > 0 && rows.every((c) => selected.has(c.id))
   const someSel = rows.some((c) => selected.has(c.id))
-  const w = keys.length > 2 ? 170 : 210
+  const w = keys.length > 2 ? 165 : 200
   return (
     <table className="logs">
       <colgroup>
-        <col style={{ width: 44 }} /><col style={{ width: 270 }} /><col style={{ width: 140 }} /><col style={{ width: 180 }} />
-        <col style={{ width: 250 }} /><col style={{ width: 160 }} />{keys.map((x) => <col key={x.k} style={{ width: w }} />)}
+        <col style={{ width: 44 }} /><col style={{ width: 260 }} /><col style={{ width: 125 }} /><col style={{ width: 165 }} />
+        <col style={{ width: 215 }} /><col style={{ width: 150 }} />{keys.map((x) => <col key={x.k} style={{ width: w }} />)}
       </colgroup>
       <thead>
         <tr>

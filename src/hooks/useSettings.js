@@ -12,6 +12,8 @@ export default function useSettings() {
   const [error, setError] = useState('')
   const [saveInfo, setSaveInfo] = useState(null)
   const loaded = useRef(false)
+  const latest = useRef(null) // newest state, so counts are right the moment a button is clicked
+  latest.current = state
 
   useEffect(() => {
     fetchSettings()
@@ -36,9 +38,10 @@ export default function useSettings() {
   // turn one setting on or off for the given clients (skips clients with no contact for that channel)
   const setMany = useCallback((ids, keyId, on) => {
     const key = keyOf(keyId), set = new Set(ids)
-    let n = 0
+    // clients that can change: in the list and have the contact this channel needs
+    const n = latest.current.clients.filter((c) => set.has(c.id) && hasContact(c, key)).length
     edit((s) => {
-      s.clients.forEach((c) => { if (set.has(c.id) && hasContact(c, key)) { c.v[keyId] = on; n++ } })
+      s.clients.forEach((c) => { if (set.has(c.id) && hasContact(c, key)) c.v[keyId] = on })
       return s
     })
     return n
