@@ -148,7 +148,7 @@ th.sel, td.sel { text-align: center; padding: 0; }
 .tag { white-space: nowrap; }
 /* checkbox and client columns stay in view when the table scrolls sideways */
 table.logs th:nth-child(1), table.logs td:nth-child(1) { position: sticky; left: 0; z-index: 3; }
-table.logs th:nth-child(2), table.logs td:nth-child(2) { position: sticky; left: 44px; z-index: 3; box-shadow: 1px 0 0 var(--rule); }
+table.logs th:nth-child(2), table.logs td:nth-child(2) { position: sticky; left: 44px; z-index: 3; }
 table.logs td:nth-child(1), table.logs td:nth-child(2) { background: var(--paper); }
 table.logs th:nth-child(1), table.logs th:nth-child(2) { z-index: 5; }
 .title { font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
@@ -197,3 +197,15 @@ table.logs { min-width: 0; }
 th { height: 52px; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; padding-top: 6px; padding-bottom: 6px; }
 .colh .nm { white-space: normal; overflow-wrap: normal; }
 .colh .nm em { white-space: nowrap; }
+
+/* readability pass: nothing smaller than 12px, and every text colour at least 4.5:1 against its background */
+th { font-size: 12px; color: var(--ink-2); }
+.colh .nm em { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+.muted-cell, .editable, .editinput { font-size: 14px; }
+.sub { font-size: 12px; }
+.tag { font-size: 12px; }
+.badge { font-size: 12px; }
+.defpop small, .setrow .l small, .defpop .hd span { font-size: 12px; }
+.menu-title { font-size: 12px; }
+.search::placeholder, .editinput::placeholder { color: var(--ink-3); opacity: 1; }
+.fbtn { width: 28px; height: 28px; color: var(--ink-3); }

@@ -4,9 +4,12 @@ export const KEYS = [
   { k: 's2a',   name: 'GSTR-2A / 2B',       sub: 'Email',    ch: 'email', tab: 'rep', desc: 'Email the 2A / 2B report on schedule' },
   { k: 'tally', name: 'Tally data',         sub: 'Email',    ch: 'email', tab: 'rep', desc: 'Email the Tally data file on schedule' },
   { k: 'w2b',   name: '2B report',          sub: 'WhatsApp', ch: 'wa',    tab: 'rep', desc: 'Send the 2B summary on WhatsApp on schedule' },
-  { k: 'nE',    name: 'Notify on email',    sub: 'Email',    ch: 'email', tab: 'upd', desc: 'Email the client when their data is updated' },
-  { k: 'nW',    name: 'Notify on WhatsApp', sub: 'WhatsApp', ch: 'wa',    tab: 'upd', desc: 'WhatsApp the client when their data is updated' },
+  { k: 'nE',    name: 'Notify on email',    sub: 'Email',    ch: 'email', tab: 'upd', named: true, desc: 'Email the client when their data is updated' },
+  { k: 'nW',    name: 'Notify on WhatsApp', sub: 'WhatsApp', ch: 'wa',    tab: 'upd', named: true, desc: 'WhatsApp the client when their data is updated' },
 ]
+
+// `named` = the setting's name already says the channel, so the channel is not repeated next to it
+export const fullName = (x) => (x.named ? x.name : `${x.name} (${x.sub.toLowerCase()})`)
 
 export const TABS = [
   { id: 'rep', label: 'Scheduled Reports', icon: 'calendar' },

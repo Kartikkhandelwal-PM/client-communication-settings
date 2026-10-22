@@ -1,6 +1,6 @@
 import { Switch, Popover, Icon, ChannelIcon } from './ui.jsx'
 import EditableCell from './EditableCell.jsx'
-import { hasContact } from '../api/mockData.js'
+import { hasContact, fullName } from '../api/mockData.js'
 
 // off / on / mixed / none (nobody listed has the contact needed)
 function columnState(key, rows) {
@@ -13,12 +13,12 @@ function columnState(key, rows) {
 export default function SettingsTable({ keys, rows, allRows, selected, onSelect, onSelectPage, onToggle, onEditContact, onInvalid, onToggleColumn }) {
   const allSel = rows.length > 0 && rows.every((c) => selected.has(c.id))
   const someSel = rows.some((c) => selected.has(c.id))
-  const w = keys.length > 2 ? 165 : 200
+  const w = keys.length > 2 ? 185 : 215
   return (
     <table className="logs">
       <colgroup>
-        <col style={{ width: 44 }} /><col style={{ width: 260 }} /><col style={{ width: 125 }} /><col style={{ width: 165 }} />
-        <col style={{ width: 215 }} /><col style={{ width: 150 }} />{keys.map((x) => <col key={x.k} style={{ width: w }} />)}
+        <col style={{ width: 44 }} /><col style={{ width: 260 }} /><col style={{ width: 125 }} /><col style={{ width: 170 }} />
+        <col style={{ width: 245 }} /><col style={{ width: 145 }} />{keys.map((x) => <col key={x.k} style={{ width: w }} />)}
       </colgroup>
       <thead>
         <tr>
@@ -31,7 +31,7 @@ export default function SettingsTable({ keys, rows, allRows, selected, onSelect,
               <th key={x.k} className="c">
                 <div className="colh">
                   <ChannelIcon ch={x.ch} size={22} />
-                  <span className="nm">{x.name}<em>{x.sub}</em></span>
+                  <span className="nm">{x.name}{!x.named && <em>{x.sub}</em>}</span>
                   <Popover width={250} button={({ onClick, open }) => (
                     <button className={`fbtn ${open ? 'open' : ''}`} onClick={onClick} aria-expanded={open} aria-label={`Change ${x.name} for all listed clients`} title="Change for all listed clients">
                       <Icon name="chevron" size={14} />
@@ -39,7 +39,7 @@ export default function SettingsTable({ keys, rows, allRows, selected, onSelect,
                   )}>
                     {(close) => (
                       <div className="pop-list">
-                        <div className="menu-title">{x.name} ({x.sub.toLowerCase()})</div>
+                        <div className="menu-title">{fullName(x)}</div>
                         <div className="small muted hint">{on} of {ok.length} listed clients have this on</div>
                         <button disabled={!ok.length || on === ok.length} onClick={() => { onToggleColumn(x, true); close() }}>Turn on for all {ok.length} listed</button>
                         <button disabled={!ok.length || on === 0} onClick={() => { onToggleColumn(x, false); close() }}>Turn off for all {ok.length} listed</button>

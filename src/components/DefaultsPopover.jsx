@@ -17,8 +17,8 @@ export default function DefaultsPopover({ defaults, onDefault, onTestClient }) {
               <h4>{t.label}</h4>
               {KEYS.filter((x) => x.tab === t.id).map((x) => (
                 <div className="row" key={x.k}>
-                  <div className="l"><b><ChannelIcon ch={x.ch} size={18} />{x.name}</b><small>{x.sub}</small></div>
-                  <Switch checked={!!defaults[x.k]} wa={x.ch === 'wa'} onChange={(on) => onDefault(x.k, on)} label={`${x.name} by ${x.sub} for new clients`} />
+                  <div className="l"><b><ChannelIcon ch={x.ch} size={18} />{x.name}</b>{!x.named && <small>{x.sub}</small>}</div>
+                  <Switch checked={!!defaults[x.k]} wa={x.ch === 'wa'} onChange={(on) => onDefault(x.k, on)} label={`${x.name} for new clients`} />
                 </div>
               ))}
             </section>

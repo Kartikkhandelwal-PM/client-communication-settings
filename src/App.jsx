@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSettings from './hooks/useSettings.js'
-import { KEYS, TABS } from './api/mockData.js'
+import { KEYS, TABS, fullName } from './api/mockData.js'
 import { Icon, FilterButton, Pager, useToast } from './components/ui.jsx'
 import SettingsTable from './components/SettingsTable.jsx'
 import DefaultsPopover from './components/DefaultsPopover.jsx'
@@ -50,7 +50,7 @@ export default function App() {
   const toggleOne = (id, key, on) => s.setMany([id], key, on)
   const toggleColumn = (x, on) => {
     const n = s.setMany(rows.map((c) => c.id), x.k, on)
-    say(`${x.name} (${x.sub.toLowerCase()}) turned ${on ? 'on' : 'off'} for ${n} clients.`)
+    say(`${fullName(x)} turned ${on ? 'on' : 'off'} for ${n} clients.`)
   }
   const select = (id, on) => setSelected((p) => { const n = new Set(p); on ? n.add(id) : n.delete(id); return n })
   const selectPage = (on) => setSelected((p) => { const n = new Set(p); pageRows.forEach((c) => (on ? n.add(c.id) : n.delete(c.id))); return n })
@@ -133,7 +133,7 @@ function SelectionBar({ keys, count, onApply, onClear }) {
       <b>{count} selected</b>
       <span className="muted">Turn</span>
       <select value={valid} onChange={(e) => setKey(e.target.value)} aria-label="Setting to change">
-        {keys.map((x) => <option key={x.k} value={x.k}>{x.name} ({x.sub.toLowerCase()})</option>)}
+        {keys.map((x) => <option key={x.k} value={x.k}>{fullName(x)}</option>)}
       </select>
       <button className="btn" onClick={() => onApply(valid, true)}>On</button>
       <button className="btn ghost" onClick={() => onApply(valid, false)}>Off</button>
