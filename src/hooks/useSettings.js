@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchSettings, saveSettings } from '../api/settings.js'
-import { KEYS, TEST_CLIENT, hasContact, makeClient } from '../api/mockData.js'
+import { KEYS, hasContact } from '../api/mockData.js'
 
 const keyOf = (id) => KEYS.find((k) => k.k === id)
 const clone = (s) => ({ ...s, clients: s.clients.map((c) => ({ ...c, v: { ...c.v } })), defaults: { ...s.defaults } })
@@ -71,14 +71,5 @@ export default function useSettings() {
 
   const setDefault = useCallback((keyId, on) => edit((s) => ({ ...s, defaults: { ...s.defaults, [keyId]: on } })), [edit])
 
-  // prototype helper: pretend Client Master just sent a new client. It gets the defaults straight away.
-  const addTestClient = useCallback(() => {
-    edit((s) => {
-      const c = makeClient(TEST_CLIENT)
-      KEYS.forEach((x) => { c.v[x.k] = !!s.defaults[x.k] && hasContact(c, x) })
-      return { ...s, clients: [c, ...s.clients] }
-    })
-  }, [edit])
-
-  return { state, error, saveInfo, setMany, setAll, setContact, setDefault, addTestClient }
+  return { state, error, saveInfo, setMany, setAll, setContact, setDefault }
 }

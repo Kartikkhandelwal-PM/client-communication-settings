@@ -17,7 +17,7 @@ export default function RunDetail({ run, loading }) {
 
   if (!run) return <main className="page"><div className="crumbs"><a href="#/whatsapp-logs">← Back to WhatsApp Logs</a></div><div className="empty">{loading ? <><div className="spinner" />Loading…</> : <><b>Run not found</b><span className="muted">It may be older than 60 days.</span></>}</div></main>
 
-  const cards = [['Targeted', run.targeted, ''], ['Submitted', run.submitted, ''], ['Delivered', run.delivered, 'green'], ['Read', run.read, 'blue'], ['Sent', run.sent, 'amber'], ['Failed', run.failed, 'red'], ['Skipped', run.skipped, '']]
+  const cards = [['Targeted', run.targeted, ''], ['Submitted', run.submitted, ''], ['Pending', run.pending, ''], ['Sent', run.sent, 'amber'], ['Delivered', run.delivered, 'green'], ['Read', run.read, 'blue'], ['Failed', run.failed, 'red'], ['Skipped', run.skipped, '']]
   const exportCsv = () => downloadCsv(toCsv([['ID', (m) => m.id], ['Client', (m) => m.client], ['GSTIN', (m) => m.gstin], ['Mobile', (m) => m.mobile], ['Status', (m) => STATUSES[m.status].label], ['Sent at', (m) => fmtSec(m.sentAt)], ['Delivered at', (m) => fmtSec(m.deliveredAt)], ['Read at', (m) => fmtSec(m.readAt)], ['Reason', (m) => m.reason]].map(([label, value]) => ({ label, value })), rows), `${run.id}.csv`)
 
   return (

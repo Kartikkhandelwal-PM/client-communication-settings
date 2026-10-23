@@ -63,7 +63,7 @@ Sources: [API reference](https://rampwin-api.readme.io/reference/api-authenticat
 
 These follow WhatsApp's own statuses (checked against
 [Meta's status webhook reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/messages/status.md)).
-Rampwin has its own statuses (Message History screen: Send Status `PENDING` / `SENT` / `FAILED` / `NOT_ON_WHATSAPP`, Read Status `TRIGGERED` / `DELIVERED` / `VIEWED`). Their webhook is not documented, so the mapping below is a proposal.
+Rampwin has its own statuses (Message History screen: Send Status `PENDING` / `SENT` / `FAILED` / `NOT_ON_WHATSAPP`, Read Status `TRIGGERED` / `DELIVERED` / `VIEWED`). Their webhook is not documented, and the docs give the names only, not what each one means. So the mapping below is a proposal from the names, and Read Status `TRIGGERED` is left unmapped until Rampwin explains it.
 
 | Status on the page | WhatsApp status | Meaning |
 |---|---|---|
@@ -88,7 +88,7 @@ Submitted = Sent + Delivered + Read + Failed.
 | Rampwin | Status on the page |
 |---|---|
 | Send Status `PENDING` | Pending (waiting to be sent to WhatsApp) |
-| Send Status `SENT`, Read Status `TRIGGERED` | Sent |
+| Send Status `SENT` | Sent |
 | Read Status `DELIVERED` | Delivered |
 | Read Status `VIEWED` | Read |
 | Send Status `FAILED` | Failed (with the reason) |

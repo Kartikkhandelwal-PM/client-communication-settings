@@ -7,13 +7,14 @@ import { ROWS, sampleRows } from './mockData.js'
 // A "run" is one go at it, for example the 2B Report on one day. It records how many
 // clients were targeted that day and what happened to each message.
 export const STATUSES = {
+  pending: { label: 'Pending', tone: 'gray', help: 'Waiting to be sent to WhatsApp' },
   delivered: { label: 'Delivered', tone: 'green', help: 'Reached the client\'s phone' },
   read: { label: 'Read', tone: 'blue', help: 'The client opened the message' },
-  sent: { label: 'Sent', tone: 'amber', help: 'Left WhatsApp, not on the client\'s phone yet (one tick)' },
+  sent: { label: 'Sent', tone: 'amber', help: 'Handed over to WhatsApp, not yet on the client\'s phone' },
   failed: { label: 'Failed', tone: 'red', help: 'Could not be delivered' },
   skipped: { label: 'Skipped', tone: 'gray', help: 'Not sent, for example no valid WhatsApp number' },
 }
-export const STATUS_ORDER = ['delivered', 'read', 'sent', 'failed', 'skipped']
+export const STATUS_ORDER = ['pending', 'sent', 'delivered', 'read', 'failed', 'skipped']
 export const MESSAGES = [
   { value: '2b', label: '2B report', trigger: 'Scheduled' },
   { value: 'upd', label: 'Update alert', trigger: 'Update alert' },
@@ -51,11 +52,12 @@ function makeRuns() {
       const skipped = Math.round(targeted * (0.01 + rnd() * 0.04))
       const submitted = targeted - skipped
       const fresh = (NOW - at) < 3 * 3600e3
-      const sent = fresh ? Math.round(submitted * (0.1 + rnd() * 0.25)) : Math.round(submitted * rnd() * 0.01)
-      const failed = Math.round(sent * (0.01 + rnd() * 0.04))
-      const rest = submitted - sent - failed
+      const pending = fresh ? Math.round(submitted * (0.05 + rnd() * 0.12)) : 0
+      const sent = fresh ? Math.round(submitted * (0.05 + rnd() * 0.12)) : Math.round(submitted * rnd() * 0.01)
+      const failed = Math.round(submitted * (0.005 + rnd() * 0.02))
+      const rest = submitted - pending - sent - failed
       const read = Math.round(rest * (fresh ? 0.2 : 0.55 + rnd() * 0.25))
-      runs.push({ msg, event, at, targeted, skipped, submitted, sent, failed, read, delivered: rest - read })
+      runs.push({ msg, event, at, targeted, skipped, submitted, pending, sent, failed, read, delivered: rest - read })
     }
     add('2b', 10, 0)
     EVENTS.forEach((e, i) => { if (rnd() < 0.14) add('upd', 9 + i * 4, Math.floor(rnd() * 55), e.value) })
@@ -70,7 +72,7 @@ const RUNS = makeRuns()
 export function runMessages(run) {
   const rnd = seeded(run.id.split('-')[1] * 97)
   const list = []
-  for (const [status, n] of [['read', run.read], ['delivered', run.delivered], ['sent', run.sent], ['failed', run.failed], ['skipped', run.skipped]]) {
+  for (const [status, n] of [['read', run.read], ['delivered', run.delivered], ['pending', run.pending], ['sent', run.sent], ['failed', run.failed], ['skipped', run.skipped]]) {
     for (let i = 0; i < n; i++) list.push(status)
   }
   for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [list[i], list[j]] = [list[j], list[i]] }
@@ -94,7 +96,7 @@ const SINGLES = (() => {
   return Array.from({ length: 24 }, (_, i) => {
     const [client, mobile, gstin] = people[Math.floor(rnd() * people.length)]
     const at = new Date(NOW.getTime() - (i * 5 + rnd() * 5) * 3600e3)
-    const status = rnd() < 0.6 ? 'read' : rnd() < 0.7 ? 'delivered' : rnd() < 0.5 ? 'sent' : 'failed'
+    const status = rnd() < 0.6 ? 'read' : rnd() < 0.7 ? 'delivered' : rnd() < 0.5 ? (rnd() < 0.5 ? 'sent' : 'pending') : 'failed'
     const delivered = status === 'delivered' || status === 'read' ? new Date(at.getTime() + 8000) : null
     const event = SINGLE_EVENTS[Math.floor(rnd() * SINGLE_EVENTS.length)]
     return { id: `WS-${500 - i}`, client, gstin, mobile: mobile || '98250 00000', event, by: event === '2B Report' ? ['Neha Gupta', 'Rahul Verma', 'Amit Shah'][i % 3] : 'System',
@@ -104,7 +106,7 @@ const SINGLES = (() => {
 })()
 let singleSeq = 501
 export function addSingleLog({ client, gstin, mobile, event }) {
-  SINGLES.unshift({ id: `WS-${singleSeq++}`, client, gstin, mobile, event, by: 'You', status: 'sent', sentAt: new Date(), deliveredAt: null, readAt: null, reason: '' })
+  SINGLES.unshift({ id: `WS-${singleSeq++}`, client, gstin, mobile, event, by: 'You', status: 'pending', sentAt: new Date(), deliveredAt: null, readAt: null, reason: '' })
 }
 
 // Stand-ins for the real endpoints

@@ -2,7 +2,7 @@ import { Popover, Switch, Icon, ChannelIcon } from './ui.jsx'
 import { KEYS, TABS } from '../api/mockData.js'
 
 // "New client defaults": every new client added from Client Master gets these settings straight away
-export default function DefaultsPopover({ defaults, onDefault, onTestClient }) {
+export default function DefaultsPopover({ defaults, onDefault }) {
   return (
     <Popover width={390} align="right" button={({ onClick, open }) => (
       <button className="btn ghost" onClick={onClick} aria-expanded={open}>
@@ -23,11 +23,6 @@ export default function DefaultsPopover({ defaults, onDefault, onTestClient }) {
               ))}
             </section>
           ))}
-          <div className="foot">
-            <span>Existing clients are not changed.</span>
-            {/* prototype only: simulates Client Master sending a new client. Remove when the real feed exists. */}
-            <button className="link" onClick={onTestClient}>Try: add a test client</button>
-          </div>
         </div>
       )}
     </Popover>

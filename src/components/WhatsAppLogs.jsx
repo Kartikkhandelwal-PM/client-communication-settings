@@ -44,7 +44,7 @@ export default function WhatsAppLogs({ runId }) {
 
   const exportCsv = () => {
     const cols = tab === 'runs'
-      ? [['ID', (r) => r.id], ['Trigger event', (r) => eventLabel(r)], ['Run at', (r) => fmt(r.at)], ['Targeted', (r) => r.targeted], ['Submitted', (r) => r.submitted], ['Delivered', (r) => r.delivered], ['Read', (r) => r.read], ['Sent', (r) => r.sent], ['Failed', (r) => r.failed], ['Skipped', (r) => r.skipped]]
+      ? [['ID', (r) => r.id], ['Trigger event', (r) => eventLabel(r)], ['Run at', (r) => fmt(r.at)], ['Targeted', (r) => r.targeted], ['Submitted', (r) => r.submitted], ['Pending', (r) => r.pending], ['Sent', (r) => r.sent], ['Delivered', (r) => r.delivered], ['Read', (r) => r.read], ['Failed', (r) => r.failed], ['Skipped', (r) => r.skipped]]
       : [['ID', (r) => r.id], ['Client', (r) => r.client], ['GSTIN', (r) => r.gstin], ['Mobile', (r) => r.mobile], ['Trigger event', (r) => singleEvent(r)], ['Sent by', (r) => r.by], ['Sent at', (r) => fmt(r.sentAt)], ['Status', (r) => STATUSES[r.status].label], ['Reason', (r) => r.reason]]
     downloadCsv(toCsv(cols.map(([label, value]) => ({ label, value })), rows), `whatsapp-${tab}.csv`)
   }
@@ -78,11 +78,11 @@ export default function WhatsAppLogs({ runId }) {
       <section className="panel" aria-label="WhatsApp logs">
         <div className="panel-scroll">
           {rows.length > 0 && tab === 'runs' && (
-            <table className="logs flat" style={{ minWidth: 1360 }}>
-              <colgroup><col style={{ width: 100 }} /><col style={{ width: 260 }} /><col style={{ width: 190 }} />{Array.from({ length: 7 }, (_, i) => <col key={i} style={{ width: 100 }} />)}<col style={{ width: 110 }} /></colgroup>
+            <table className="logs flat" style={{ minWidth: 1460 }}>
+              <colgroup><col style={{ width: 100 }} /><col style={{ width: 260 }} /><col style={{ width: 190 }} />{Array.from({ length: 8 }, (_, i) => <col key={i} style={{ width: 100 }} />)}<col style={{ width: 110 }} /></colgroup>
               <thead><tr><th>ID</th><th>Trigger event</th><th>Run at</th>
                 <th className="r" title="Clients selected for this run (their switch was on)">Targeted</th><th className="r" title="Messages handed to WhatsApp (targeted minus skipped)">Submitted</th>
-                <th className="r">Delivered</th><th className="r">Read</th><th className="r" title="Left WhatsApp, not on the client's phone yet (one tick)">Sent</th><th className="r">Failed</th><th className="r" title="Not sent, for example no valid WhatsApp number">Skipped</th><th className="r" title="Delivered or read, out of submitted">Reached</th></tr></thead>
+                <th className="r" title="Waiting to be sent to WhatsApp">Pending</th><th className="r" title="Handed over to WhatsApp, not yet on the client's phone">Sent</th><th className="r">Delivered</th><th className="r">Read</th><th className="r">Failed</th><th className="r" title="Not sent, for example no valid WhatsApp number">Skipped</th><th className="r" title="Delivered or read, out of submitted">Reached</th></tr></thead>
               <tbody>
                 {slice.map((r) => (
                   <tr key={r.id} className="click" onClick={() => { window.location.hash = `#/whatsapp-logs/${r.id}` }}>
@@ -90,8 +90,9 @@ export default function WhatsAppLogs({ runId }) {
                     <td><span className="title" title={eventLabel(r)}>{eventLabel(r)}</span></td>
                     <td className="muted-cell">{fmt(r.at)}</td>
                     <td className="r num"><b>{num(r.targeted)}</b></td><td className="r num">{num(r.submitted)}</td>
+                    <td className="r num"><Count n={r.pending} /></td><td className="r num"><Count n={r.sent} tone="amber" /></td>
                     <td className="r num"><Count n={r.delivered} tone="green" /></td><td className="r num"><Count n={r.read} tone="blue" /></td>
-                    <td className="r num"><Count n={r.sent} tone="amber" /></td><td className="r num"><Count n={r.failed} tone="red" /></td>
+                    <td className="r num"><Count n={r.failed} tone="red" /></td>
                     <td className="r num"><Count n={r.skipped} /></td><td className="r num">{r.rate}%</td>
                   </tr>
                 ))}

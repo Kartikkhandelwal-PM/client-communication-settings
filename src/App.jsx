@@ -108,11 +108,6 @@ function SettingsPage() {
     say(recent ? `${last.current.msg} Saved.` : 'Saved')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.saveInfo])
-  const addTest = () => {
-    s.addTestClient()
-    say('A new client was added and your defaults were applied.')
-  }
-
   if (s.error) return <main className="page"><div className="alert">Could not load settings: {s.error}</div></main>
   if (!s.state) return <main className="page"><div className="empty"><div className="spinner" />Loading settings…</div></main>
 
@@ -141,7 +136,7 @@ function SettingsPage() {
         <FilterButton label="Registration type" icon="tag" value={f.reg} options={regOptions} onChange={(reg) => setF({ ...f, reg })} />
         <FilterButton label="Status" icon="status" value={f.stat} options={statOptions} onChange={(stat) => setF({ ...f, stat })} />
         <span className="vsep" aria-hidden="true" />
-        <DefaultsPopover defaults={s.state.defaults} onDefault={s.setDefault} onTestClient={addTest} />
+        <DefaultsPopover defaults={s.state.defaults} onDefault={s.setDefault} />
         <a className="btn ghost" href="#/whatsapp-logs"><ChannelIcon ch="wa" size={18} />WhatsApp Logs</a>
       </div>
 

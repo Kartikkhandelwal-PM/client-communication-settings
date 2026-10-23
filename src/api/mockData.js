@@ -66,6 +66,5 @@ export function sampleRows(n) {
 }
 
 export const initialClients = () => [...ROWS, ...sampleRows(SAMPLE_COUNT)].map((r) => makeClient(r))
-export const TEST_CLIENT = ['Sunrise Medical Stores', '24AASFS9021K1ZB', 'Regular', 'Mehul Trivedi', 'mehul@sunrisemed.example', '98250 90210', [0, 0, 0, 0, 0]]
 
 export const INITIAL_DEFAULTS = { s2a: true, tally: false, w2b: false, nE: true, nW: false }
