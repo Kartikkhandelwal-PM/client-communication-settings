@@ -3,7 +3,7 @@
 export const KEYS = [
   { k: 's2a',   name: 'GSTR-2A / 2B',       sub: 'Email',    ch: 'email', tab: 'rep', desc: 'Email the 2A / 2B report on schedule' },
   { k: 'tally', name: 'Tally data',         sub: 'Email',    ch: 'email', tab: 'rep', desc: 'Email the Tally data file on schedule' },
-  { k: 'w2b',   name: '2B report',          sub: 'WhatsApp', ch: 'wa',    tab: 'rep', desc: 'Send the 2B summary on WhatsApp on schedule' },
+  { k: 'w2b',   name: '2B Report',          sub: 'WhatsApp', ch: 'wa',    tab: 'rep', desc: 'Send the 2B summary on WhatsApp on schedule' },
   { k: 'nE',    name: 'Notify on email',    sub: 'Email',    ch: 'email', tab: 'upd', named: true, desc: 'Email the client when their data is updated' },
   { k: 'nW',    name: 'Notify on WhatsApp', sub: 'WhatsApp', ch: 'wa',    tab: 'upd', named: true, desc: 'WhatsApp the client when their data is updated' },
 ]
@@ -17,7 +17,7 @@ export const TABS = [
 ]
 
 // name, GSTIN, registration type, contact person, email, mobile, [s2a, tally, w2b, nE, nW]
-const ROWS = [
+export const ROWS = [
   ['Bluestone Traders Private Limited', '24AABCB1234F1Z5', 'Regular', 'Anil Mehta', 'accounts@bluestone.example', '98250 11122', [1, 1, 0, 1, 0]],
   ['Kaveri Textiles', '33AAKFK5678L1ZP', 'Regular', 'Meena Raman', 'meena@kaveritex.example', '98946 22331', [1, 0, 0, 1, 1]],
   ['Orion Packaging LLP', '27AAOFO4321K1Z9', 'Regular', 'Sanjay Kulkarni', 'finance@orionpack.example', '99205 44418', [0, 0, 0, 0, 0]],
@@ -49,7 +49,7 @@ const LAST = ['Traders', 'Enterprises', 'Industries', 'Textiles', 'Agencies', 'F
 const SUFFIX = ['', '', ' Private Limited', ' LLP', ' & Co', ' Limited']
 const PEOPLE = ['Rahul Verma', 'Priya Iyer', 'Amit Shah', 'Neha Gupta', 'Karan Malhotra', 'Sunita Rao', 'Vikram Singh', 'Anjali Desai', 'Rohit Nair', 'Pooja Kapoor']
 const STATES = ['24', '27', '29', '33', '06', '07', '09', '19', '32', '36']
-function sampleRows(n) {
+export function sampleRows(n) {
   let seed = 7
   const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)
   const pick = (a) => a[Math.floor(rnd() * a.length)]

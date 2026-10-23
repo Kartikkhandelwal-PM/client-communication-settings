@@ -8,6 +8,12 @@ export async function fetchSettings() {
   return { clients: initialClients(), defaults: INITIAL_DEFAULTS }
 }
 
+// Send one report to one client right now, whatever the switch says. Replace with the real send call.
+export async function sendNow({ clientId, key }) {
+  await wait(700)
+  return { ok: true, clientId, key }
+}
+
 // payload: { clients: [{ id, v, person, email, mobile }], defaults }
 export async function saveSettings(payload) {
   await wait(300)

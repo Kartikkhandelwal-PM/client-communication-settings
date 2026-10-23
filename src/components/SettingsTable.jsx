@@ -2,6 +2,18 @@ import { Switch, Popover, Icon, ChannelIcon } from './ui.jsx'
 import EditableCell from './EditableCell.jsx'
 import { hasContact, fullName } from '../api/mockData.js'
 
+// Sends this one report to this one client right away, even when the switch is off
+function SendButton({ keyDef: x, client: c, ok, state, onSend }) {
+  const how = x.ch === 'wa' ? 'WhatsApp' : 'email'
+  return (
+    <button className={`sendbtn ${state || ''}`} disabled={!ok || state === 'sending'} onClick={() => onSend(c, x)}
+      title={ok ? `Send ${x.name} by ${how} to ${c.name} now` : `No ${x.ch === 'wa' ? 'mobile number' : 'email'}, cannot send`}
+      aria-label={`Send ${x.name} by ${how} to ${c.name} now`}>
+      {state === 'sending' ? <span className="mini-spin" /> : state === 'sent' ? <Icon name="check" size={16} /> : <ChannelIcon ch={x.ch} size={20} />}
+    </button>
+  )
+}
+
 // off / on / mixed / none (nobody listed has the contact needed)
 function columnState(key, rows) {
   const ok = rows.filter((c) => hasContact(c, key))
@@ -10,12 +22,14 @@ function columnState(key, rows) {
   return on === 0 ? 'off' : on === ok.length ? 'on' : 'mixed'
 }
 
-export default function SettingsTable({ keys, rows, allRows, selected, onSelect, onSelectPage, onToggle, onEditContact, onInvalid, onToggleColumn }) {
+export default function SettingsTable({ keys, rows, allRows, selected, onSelect, onSelectPage, onToggle, onEditContact, onInvalid, onSend, sendState, onToggleColumn }) {
   const allSel = rows.length > 0 && rows.every((c) => selected.has(c.id))
   const someSel = rows.some((c) => selected.has(c.id))
   const w = keys.length > 2 ? 185 : 215
+  // the table never gets narrower than its columns; a small window scrolls sideways instead of squeezing a column
+  const minWidth = 44 + 260 + 125 + 170 + 245 + 145 + keys.length * w
   return (
-    <table className="logs">
+    <table className="logs" style={{ minWidth }}>
       <colgroup>
         <col style={{ width: 44 }} /><col style={{ width: 260 }} /><col style={{ width: 125 }} /><col style={{ width: 170 }} />
         <col style={{ width: 245 }} /><col style={{ width: 145 }} />{keys.map((x) => <col key={x.k} style={{ width: w }} />)}
@@ -31,7 +45,7 @@ export default function SettingsTable({ keys, rows, allRows, selected, onSelect,
               <th key={x.k} className="c">
                 <div className="colh">
                   <ChannelIcon ch={x.ch} size={22} />
-                  <span className="nm">{x.name}{!x.named && <em>{x.sub}</em>}</span>
+                  <span className="nm">{x.name}</span>
                   <Popover width={250} button={({ onClick, open }) => (
                     <button className={`fbtn ${open ? 'open' : ''}`} onClick={onClick} aria-expanded={open} aria-label={`Change ${x.name} for all listed clients`} title="Change for all listed clients">
                       <Icon name="chevron" size={14} />
@@ -72,7 +86,10 @@ export default function SettingsTable({ keys, rows, allRows, selected, onSelect,
               const ok = hasContact(c, x)
               return (
                 <td key={x.k} className="c" title={ok ? undefined : x.ch === 'wa' ? 'Add a mobile number to use WhatsApp' : 'Add an email address to use email'}>
-                  <Switch checked={c.v[x.k]} disabled={!ok} wa={x.ch === 'wa'} label={`${x.name} for ${c.name}`} onChange={(on) => onToggle(c.id, x.k, on)} />
+                  <div className="cellrow">
+                    <Switch checked={c.v[x.k]} disabled={!ok} wa={x.ch === 'wa'} label={`${x.name} for ${c.name}`} onChange={(on) => onToggle(c.id, x.k, on)} />
+                    {x.tab === 'rep' && <SendButton keyDef={x} client={c} ok={ok} state={sendState[`${c.id}:${x.k}`]} onSend={onSend} />}
+                  </div>
                 </td>
               )
             })}
