@@ -124,7 +124,6 @@ function SettingsPage() {
           <h1><span className="titleicon"><Icon name="gear" size={20} /></span>Client Communication Settings</h1>
           <p className="muted">Choose which reports and update alerts each client gets, on email and WhatsApp.</p>
         </div>
-        <div className="topbtns"><a className="btn line" href="#/whatsapp-logs"><ChannelIcon ch="wa" size={18} />WhatsApp Logs</a></div>
       </header>
 
       <div className="controls">
@@ -141,8 +140,9 @@ function SettingsPage() {
         </label>
         <FilterButton label="Registration type" icon="tag" value={f.reg} options={regOptions} onChange={(reg) => setF({ ...f, reg })} />
         <FilterButton label="Status" icon="status" value={f.stat} options={statOptions} onChange={(stat) => setF({ ...f, stat })} />
-        <span className="grow" />
+        <span className="vsep" aria-hidden="true" />
         <DefaultsPopover defaults={s.state.defaults} onDefault={s.setDefault} onTestClient={addTest} />
+        <a className="btn ghost" href="#/whatsapp-logs"><ChannelIcon ch="wa" size={18} />WhatsApp Logs</a>
       </div>
 
       <section className="panel" aria-label="Clients">

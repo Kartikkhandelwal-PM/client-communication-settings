@@ -5,8 +5,8 @@ import { KEYS, TABS } from '../api/mockData.js'
 export default function DefaultsPopover({ defaults, onDefault, onTestClient }) {
   return (
     <Popover width={390} align="right" button={({ onClick, open }) => (
-      <button className="fbtn2" onClick={onClick} aria-expanded={open}>
-        <Icon name="gear" />New client defaults<span className="chev"><Icon name="chevron" size={14} /></span>
+      <button className="btn ghost" onClick={onClick} aria-expanded={open}>
+        <Icon name="gear" size={16} />New client defaults
       </button>
     )}>
       {() => (

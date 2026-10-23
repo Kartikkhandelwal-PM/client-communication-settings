@@ -285,3 +285,19 @@ table.logs.flat tbody tr:hover > td:nth-child(1),
 table.logs.flat tbody tr:hover > td:nth-child(2) { background: color-mix(in srgb, var(--accent-soft) 55%, var(--paper)); }
 table.logs.flat tbody tr:hover > td:first-child { box-shadow: inset 3px 0 0 var(--accent-line); }
 table.logs.flat tbody tr:hover .title, table.logs.flat tbody tr:hover td.idcell { color: var(--accent); }
+
+/* the WhatsApp Logs link sits in the toolbar row and is the same size as the other buttons there */
+.controls a.btn { height: 36px; padding: 0 12px; border-radius: 6px; font-weight: 400; font-size: 14px; }
+
+/* on a normal laptop screen the toolbar stays on one row: the search box gets narrower instead of a button dropping down */
+@media (min-width: 1240px) {
+  .controls { flex-wrap: nowrap; }
+  .controls .searchbox { flex: 1 1 120px; min-width: 120px; max-width: 320px; }
+  .controls .fbtn2, .controls a.btn, .controls .tabs { flex: none; }
+}
+
+/* actions (not filters): grey buttons with no border and no arrow, after a thin divider */
+.vsep { width: 1px; height: 24px; background: var(--rule); margin: 0 4px; flex: none; }
+.controls .btn.ghost { height: 36px; padding: 0 12px; border-radius: 6px; font-weight: 500; font-size: 14px; flex: none; }
+.controls .btn.ghost[aria-expanded="true"] { background: var(--rule); }
+@media (max-width: 1239px) { .vsep { display: none; } }
