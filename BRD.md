@@ -21,13 +21,13 @@ In the GST module, a firm can choose which messages each of its clients receives
 
 Each can go out by **email** or by **WhatsApp**. This is set on the **Client Communication Settings** page, one client per row. The user can also send a report to one client straight away by clicking the email or WhatsApp icon in that client's row.
 
-The page exists today. Emails sent from it can be seen in **Email Logs** (a separate feature, see the Email Logs BRD). **WhatsApp messages have no log.** The user cannot see how many clients a scheduled WhatsApp run was meant for, how many messages were actually sent, or what happened to them.
+The page exists today. **WhatsApp messages have no log.** The user cannot see how many clients a scheduled WhatsApp run was meant for, how many messages were actually sent, or what happened to them.
 
 ### 1.2 What we are doing
 
 Two things:
 
-1. **Refresh the look of the Client Communication Settings page.** The entry point and all of its functions stay the same. Only the layout, tables and filters are redone, to match Email Logs.
+1. **Refresh the look of the Client Communication Settings page.** The entry point and all of its functions stay the same. Only the layout, tables and filters are redone.
 2. **Add WhatsApp Logs (new).** A page where the user can see every WhatsApp message sent **from this page**: for a scheduled run, how many clients were targeted, how many messages were sent, and the status of each. A **WhatsApp Logs** button on the settings page opens it.
 
 ### 1.3 Goals
@@ -36,23 +36,19 @@ The user can:
 
 1. Keep doing everything they do on the settings page today, with the same entry point.
 2. See, for every scheduled or update-notification WhatsApp run, **how many clients were targeted** and what happened to the messages.
-3. See the status of every WhatsApp message, and the reason when it did not reach the client.
-4. Find a particular run, client or message quickly (search, filters, export).
+3. See, before the next scheduled 2B Report goes out, **how many clients it will target**.
+4. See the status of every WhatsApp message, and the reason when it did not reach the client.
+5. Find a particular run, client or message quickly (search, filters, export).
 
 ### 1.4 Scope
 
-| In scope for this version | Out of scope for this version |
-|---|---|
-| New look for the Client Communication Settings page (same functions) | Changing what the settings page does |
-| **WhatsApp Logs** page: bulk runs, single messages, per-message status | Logs for WhatsApp messages sent from anywhere else (other pages or other modules) |
-| Search, filters, date range, export (CSV) | Showing the text of the message |
-| Status and failure reason from Rampwin | Resending a message from the logs page |
-| A **WhatsApp Logs** button on the settings page | Email logs (already covered by Email Logs) |
-| | Showing, on the settings page, how many clients the **next** scheduled run will target (to be discussed later; needs changes to the screen) |
-
-> **Only messages sent from this page are logged.** This means the scheduled WhatsApp report, update notifications, and the Send button on this page. WhatsApp messages sent from any other place in Spectrum Cloud are not shown.
-
----
+- A new look for the Client Communication Settings page. Its functions and its entry point stay the same.
+- A **WhatsApp Logs** page: bulk runs, single messages, and the status of every message.
+- On the Bulk messages tab, the **next scheduled 2B Report**, with the number of clients it will target.
+- Search, filters, date range and export (CSV) in the logs.
+- The status and the failure reason of each message, taken from Rampwin.
+- A **WhatsApp Logs** button on the settings page.
+- **Only messages sent from this page are logged.** This means the scheduled WhatsApp report, update notifications, and the Send button on this page. WhatsApp messages sent from any other place in Spectrum Cloud are not shown.
 
 ## 2. Key concepts
 
@@ -80,7 +76,7 @@ A bulk run can have thousands of clients, so each run has **its own page**.
 
 ### 2.3 Trigger event
 
-Every message is sent because of something. We call this the **trigger event**: the name of the place or event the message was sent from. It is the same idea as the trigger event in Email Logs.
+Every message is sent because of something. We call this the **trigger event**: the name of the place or event the message was sent from.
 
 **List of all trigger events and their names:** `{Link to be added by the domain team}`
 
@@ -108,14 +104,12 @@ Users never see Rampwin's codes. They see short IDs made by Spectrum Cloud.
 | Number | Meaning |
 |---|---|
 | **Targeted** | Clients selected for this run: those whose switch was **on** when the run started |
-| **Submitted** | Messages handed to WhatsApp (targeted minus skipped) |
-| **Skipped** | Targeted but **not sent**, for example the client has no valid WhatsApp number |
 | **One count per status** | How many messages are in each status (below) |
-| **Reached** | Delivered + Read, as a percentage of Submitted |
+| **Reached** | Delivered + Read, as a percentage of Targeted |
 
-The numbers add up: **Targeted = Submitted + Skipped**, and Submitted is the total of all the status counts.
+The numbers add up: **Targeted is the total of all the status counts.**
 
-**Statuses.** The status of every message is **taken from Rampwin** and shown as Rampwin gives it, in plain words (for example Pending, Sent, Delivered, Read, Failed). The final list follows what Rampwin provides. **Skipped** is our own status for a message we did not send.
+**Statuses.** The status of every message is **taken from Rampwin** and shown as Rampwin gives it, in plain words (for example Pending, Sent, Delivered, Read, Failed). The final list follows what Rampwin provides.
 
 ---
 
@@ -139,7 +133,7 @@ From left to right:
 
 - **Tabs:** Scheduled Reports, Update Notification.
 - **Search:** by client name, GSTIN, contact person, email or mobile number.
-- **Filters:** Registration type (Regular / Composition), and Status (all, something turned on, all turned off, missing email or mobile).
+- **Filters:** Registration type (every registration type that exists in the system, for example Regular or Composition), and Status (all, something turned on, all turned off, missing email or mobile).
 - **New client defaults** and **WhatsApp Logs** buttons, after a thin divider. These are action buttons, not filters.
 
 Filters read the same way everywhere: "Status" when nothing is picked, "Status: Read" when something is.
@@ -152,7 +146,7 @@ One row per client.
 |---|---|
 | Checkbox | Select clients for a bulk change |
 | Client | Name, with the GSTIN below it |
-| Type | Regular / Composition |
+| Type | The client's registration type, as it is in the system |
 | Contact Person Name | Click to edit |
 | Contact Email | Click to edit. "Add email" in orange when missing |
 | Contact Mobile No. | Click to edit. "Add mobile no." in orange when missing |
@@ -170,9 +164,9 @@ One row per client.
 
 ### 4.3 Send icon (Scheduled Reports tab)
 
-Clicking the email or WhatsApp icon next to a setting **sends that report to that client straight away**, even when the switch is off. There is no confirmation. The icon shows a spinner, then a tick, and a message says what was sent and to whom. It is greyed out when the client has no email or mobile number. There is no warning if the same report was sent a few minutes earlier.
+Clicking the email or WhatsApp icon next to a setting **sends that report to that client straight away**, even when the switch is off. The icon shows a spinner, then a tick, and a message says what was sent and to whom. It is greyed out when the client has no email or mobile number.
 
-A **WhatsApp** send from this icon is written to the WhatsApp Logs as a **Single message** (section 5.5). An **email** send is written to Email Logs, as it is today.
+A **WhatsApp** send from this icon is written to the WhatsApp Logs as a **Single message** (section 5.5).
 
 ### 4.4 New client defaults
 
@@ -207,15 +201,19 @@ One row per **run** (for example, the 2B Report of one day). A run answers: **ho
 
 | Column | Notes |
 |---|---|
-| ID | `WR-…` |
+| ID | `WR-…`, or an **Upcoming** tag on the first row (see below) |
 | Trigger event | From the domain list. Today: **2B Report** |
 | Run at | When the run started |
 | **Targeted** | Clients selected for this run |
-| Submitted | Messages handed to WhatsApp |
 | One column per status | For example Pending, Sent, Delivered, Read, Failed. Follows the statuses Rampwin gives |
-| Skipped | Not sent, for example no valid WhatsApp number |
-| Reached | Delivered + Read, out of Submitted |
+| Reached | Delivered + Read, out of Targeted |
 
+
+**Upcoming row.** The first row of the list (first page only) is the **next scheduled 2B Report**. It has an **Upcoming** tag, shows **when it will run**, and shows **how many clients it will target right now**: clients whose 2B Report switch is on and who have a mobile number. The other columns show a dash, because nothing has been sent yet.
+
+- The number **follows the switches**. If the user turns a switch on or off on the settings page, the number changes.
+- When the run starts the number is **fixed**, and the row becomes a normal run with its results.
+- The row is hidden when the user searches or filters for something else (for example another trigger event).
 
 ### 5.4 When the user clicks a run: the run page
 
@@ -224,7 +222,7 @@ One row per **run** (for example, the 2B Report of one day). A run answers: **ho
 A separate page. It shows:
 
 - The run ID, the trigger event, when it ran, and how many clients were targeted.
-- **Summary cards:** Targeted, Submitted, one card per status, and Skipped, each with its share of targeted.
+- **Summary cards:** Targeted, and one card per status, each with its share of targeted.
 - A table with **one row per client message**, with search and a Status filter.
 
 | Column | Notes |
@@ -236,7 +234,7 @@ A separate page. It shows:
 | Sent at | |
 | Delivered at | |
 | Read at | |
-| Reason | The failure or skip reason |
+| Reason | The failure reason |
 
 ### 5.5 Single messages tab
 
@@ -270,7 +268,7 @@ We send WhatsApp through **Rampwin**. **The status of every message and its deli
 1. Our own ID (`WR-…`, `WS-…`) next to Rampwin's reference for the message.
 2. The **trigger event**, and whether it is a bulk run or a single message.
 3. For a bulk run: the **number of clients targeted** and the list of clients, **at the moment the run starts**. Switches can change later, so this cannot be worked out afterwards.
-4. For every client: the **GSTIN** and **mobile number** used, and whether the client was **skipped** (and why).
+4. For every client: the **GSTIN** and **mobile number** used.
 5. Who sent it (a person, or System), and the time.
 
 ---
@@ -279,7 +277,6 @@ We send WhatsApp through **Rampwin**. **The status of every message and its deli
 
 1. **Only messages sent from the settings page are logged.** Messages from anywhere else are not.
 2. A message is logged once, and its status is updated as Rampwin reports it.
-3. **Targeted** is fixed when the run starts. Changing a switch afterwards does not change old runs.
-4. A client with no WhatsApp number is **Skipped**, and still counts in Targeted.
-5. The Send icon works whatever the switch says, and its WhatsApp messages appear under Single messages.
-6. Logs older than 60 days are not shown. The number of days is a setting and can be changed later.
+3. **Targeted** is fixed when the run starts. Changing a switch afterwards does not change old runs. Before the run starts, the number on the Upcoming row follows the switches.
+4. The Send icon works whatever the switch says, and its WhatsApp messages appear under Single messages.
+5. Logs older than 60 days are not shown. The number of days is a setting and can be changed later.

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { Icon, FilterButton, Pager, ChannelIcon } from './ui.jsx'
 import RunDetail from './RunDetail.jsx'
-import { STATUSES, STATUS_ORDER, RETENTION_DAYS, EVENTS, SCHEDULED_EVENT, SINGLE_EVENTS, eventLabel, singleEvent, fetchRuns, fetchSingles, fmt, toCsv, downloadCsv } from '../api/whatsappLogs.js'
+import { STATUSES, STATUS_ORDER, RETENTION_DAYS, EVENTS, SCHEDULED_EVENT, SINGLE_EVENTS, eventLabel, singleEvent, getUpcoming, subscribeUpcoming, nextRunAt, fetchRuns, fetchSingles, fmt, toCsv, downloadCsv } from '../api/whatsappLogs.js'
 
 const PAGE_SIZES = [25, 50, 100]
 const num = (n) => n.toLocaleString()
@@ -20,6 +20,7 @@ export default function WhatsAppLogs({ runId }) {
   const [f, setF] = useState({ q: '', days: String(RETENTION_DAYS), msg: 'all', status: 'all', sev: 'all' })
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(25)
+  const upcoming = useSyncExternalStore(subscribeUpcoming, getUpcoming)
 
   useEffect(() => { fetchRuns().then(setRuns); fetchSingles().then(setSingles) }, [runId])
   useEffect(() => setPage(0), [f, tab, pageSize])
@@ -40,11 +41,13 @@ export default function WhatsAppLogs({ runId }) {
   if (runId) return <RunDetail run={runs.find((r) => r.id === runId)} loading={!runs.length} />
 
   const rows = tab === 'runs' ? runRows : singleRows
+  // the next scheduled 2B Report is shown at the top of the first page, unless a search or filter rules it out
+  const showUpcoming = tab === 'runs' && (f.msg === 'all' || f.msg === '2b') && (!f.q.trim() || 'upcoming 2b report'.includes(f.q.trim().toLowerCase()))
   const slice = rows.slice(page * pageSize, (page + 1) * pageSize)
 
   const exportCsv = () => {
     const cols = tab === 'runs'
-      ? [['ID', (r) => r.id], ['Trigger event', (r) => eventLabel(r)], ['Run at', (r) => fmt(r.at)], ['Targeted', (r) => r.targeted], ['Submitted', (r) => r.submitted], ['Pending', (r) => r.pending], ['Sent', (r) => r.sent], ['Delivered', (r) => r.delivered], ['Read', (r) => r.read], ['Failed', (r) => r.failed], ['Skipped', (r) => r.skipped]]
+      ? [['ID', (r) => r.id], ['Trigger event', (r) => eventLabel(r)], ['Run at', (r) => fmt(r.at)], ['Targeted', (r) => r.targeted], ['Pending', (r) => r.pending], ['Sent', (r) => r.sent], ['Delivered', (r) => r.delivered], ['Read', (r) => r.read], ['Failed', (r) => r.failed]]
       : [['ID', (r) => r.id], ['Client', (r) => r.client], ['GSTIN', (r) => r.gstin], ['Mobile', (r) => r.mobile], ['Trigger event', (r) => singleEvent(r)], ['Sent by', (r) => r.by], ['Sent at', (r) => fmt(r.sentAt)], ['Status', (r) => STATUSES[r.status].label], ['Reason', (r) => r.reason]]
     downloadCsv(toCsv(cols.map(([label, value]) => ({ label, value })), rows), `whatsapp-${tab}.csv`)
   }
@@ -71,29 +74,38 @@ export default function WhatsAppLogs({ runId }) {
         </label>
         {tab === 'runs' && <FilterButton label="Trigger event" icon="tag" value={f.msg} options={[{ value: 'all', label: 'All trigger events' }, { value: '2b', label: SCHEDULED_EVENT }, ...EVENTS.map((e) => ({ value: `ev:${e.value}`, label: e.label }))]} onChange={(msg) => setF({ ...f, msg })} />}
         {tab === 'single' && <FilterButton label="Trigger event" icon="tag" value={f.sev} options={[{ value: 'all', label: 'All trigger events' }, ...SINGLE_EVENTS.map((e) => ({ value: e, label: e }))]} onChange={(sev) => setF({ ...f, sev })} />}
-        {tab === 'single' && <FilterButton label="Status" icon="status" value={f.status} options={[{ value: 'all', label: 'All statuses' }, ...STATUS_ORDER.filter((s) => s !== 'skipped').map((s) => ({ value: s, label: STATUSES[s].label }))]} onChange={(status) => setF({ ...f, status })} />}
+        {tab === 'single' && <FilterButton label="Status" icon="status" value={f.status} options={[{ value: 'all', label: 'All statuses' }, ...STATUS_ORDER.map((s) => ({ value: s, label: STATUSES[s].label }))]} onChange={(status) => setF({ ...f, status })} />}
         <FilterButton label="Date" alwaysValue icon="calendar" value={f.days} options={[{ value: '60', label: 'Last 60 days' }, { value: '30', label: 'Last 30 days' }, { value: '7', label: 'Last 7 days' }, { value: '1', label: 'Today' }]} onChange={(days) => setF({ ...f, days })} />
       </div>
 
       <section className="panel" aria-label="WhatsApp logs">
         <div className="panel-scroll">
           {rows.length > 0 && tab === 'runs' && (
-            <table className="logs flat" style={{ minWidth: 1460 }}>
-              <colgroup><col style={{ width: 100 }} /><col style={{ width: 260 }} /><col style={{ width: 190 }} />{Array.from({ length: 8 }, (_, i) => <col key={i} style={{ width: 100 }} />)}<col style={{ width: 110 }} /></colgroup>
+            <table className="logs flat" style={{ minWidth: 1260 }}>
+              <colgroup><col style={{ width: 100 }} /><col style={{ width: 260 }} /><col style={{ width: 190 }} />{Array.from({ length: 6 }, (_, i) => <col key={i} style={{ width: 100 }} />)}<col style={{ width: 110 }} /></colgroup>
               <thead><tr><th>ID</th><th>Trigger event</th><th>Run at</th>
-                <th className="r" title="Clients selected for this run (their switch was on)">Targeted</th><th className="r" title="Messages handed to WhatsApp (targeted minus skipped)">Submitted</th>
-                <th className="r" title="Waiting to be sent to WhatsApp">Pending</th><th className="r" title="Handed over to WhatsApp, not yet on the client's phone">Sent</th><th className="r">Delivered</th><th className="r">Read</th><th className="r">Failed</th><th className="r" title="Not sent, for example no valid WhatsApp number">Skipped</th><th className="r" title="Delivered or read, out of submitted">Reached</th></tr></thead>
+                <th className="r" title="Clients selected for this run (their switch was on)">Targeted</th>
+                <th className="r" title="Waiting to be sent to WhatsApp">Pending</th><th className="r" title="Handed over to WhatsApp, not yet on the client's phone">Sent</th><th className="r">Delivered</th><th className="r">Read</th><th className="r">Failed</th><th className="r" title="Delivered or read, out of targeted">Reached</th></tr></thead>
               <tbody>
+                {page === 0 && showUpcoming && (
+                  <tr className="upcoming">
+                    <td><span className="badge badge-blue">Upcoming</span></td>
+                    <td><span className="title">{SCHEDULED_EVENT}</span></td>
+                    <td className="muted-cell">{fmt(nextRunAt())}</td>
+                    <td className="r num" title="Clients whose 2B Report switch is on right now. The final number is fixed when the run starts."><b>{upcoming.targeted == null ? '…' : num(upcoming.targeted)}</b></td>
+                    {Array.from({ length: 6 }, (_, i) => <td key={i} className="r num muted">—</td>)}
+                  </tr>
+                )}
                 {slice.map((r) => (
                   <tr key={r.id} className="click" onClick={() => { window.location.hash = `#/whatsapp-logs/${r.id}` }}>
                     <td className="idcell">{r.id}</td>
                     <td><span className="title" title={eventLabel(r)}>{eventLabel(r)}</span></td>
                     <td className="muted-cell">{fmt(r.at)}</td>
-                    <td className="r num"><b>{num(r.targeted)}</b></td><td className="r num">{num(r.submitted)}</td>
+                    <td className="r num"><b>{num(r.targeted)}</b></td>
                     <td className="r num"><Count n={r.pending} /></td><td className="r num"><Count n={r.sent} tone="amber" /></td>
                     <td className="r num"><Count n={r.delivered} tone="green" /></td><td className="r num"><Count n={r.read} tone="blue" /></td>
                     <td className="r num"><Count n={r.failed} tone="red" /></td>
-                    <td className="r num"><Count n={r.skipped} /></td><td className="r num">{r.rate}%</td>
+                    <td className="r num">{r.rate}%</td>
                   </tr>
                 ))}
               </tbody>

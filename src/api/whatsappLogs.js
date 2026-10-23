@@ -12,9 +12,8 @@ export const STATUSES = {
   read: { label: 'Read', tone: 'blue', help: 'The client opened the message' },
   sent: { label: 'Sent', tone: 'amber', help: 'Handed over to WhatsApp, not yet on the client\'s phone' },
   failed: { label: 'Failed', tone: 'red', help: 'Could not be delivered' },
-  skipped: { label: 'Skipped', tone: 'gray', help: 'Not sent, for example no valid WhatsApp number' },
 }
-export const STATUS_ORDER = ['pending', 'sent', 'delivered', 'read', 'failed', 'skipped']
+export const STATUS_ORDER = ['pending', 'sent', 'delivered', 'read', 'failed']
 export const MESSAGES = [
   { value: '2b', label: '2B report', trigger: 'Scheduled' },
   { value: 'upd', label: 'Update alert', trigger: 'Update alert' },
@@ -49,21 +48,19 @@ function makeRuns() {
       const at = new Date(day); at.setHours(hour, min, Math.floor(rnd() * 60))
       if (at > NOW) return
       const targeted = Math.floor(180 + rnd() * 340)
-      const skipped = Math.round(targeted * (0.01 + rnd() * 0.04))
-      const submitted = targeted - skipped
       const fresh = (NOW - at) < 3 * 3600e3
-      const pending = fresh ? Math.round(submitted * (0.05 + rnd() * 0.12)) : 0
-      const sent = fresh ? Math.round(submitted * (0.05 + rnd() * 0.12)) : Math.round(submitted * rnd() * 0.01)
-      const failed = Math.round(submitted * (0.005 + rnd() * 0.02))
-      const rest = submitted - pending - sent - failed
+      const pending = fresh ? Math.round(targeted * (0.05 + rnd() * 0.12)) : 0
+      const sent = fresh ? Math.round(targeted * (0.05 + rnd() * 0.12)) : Math.round(targeted * rnd() * 0.01)
+      const failed = Math.round(targeted * (0.005 + rnd() * 0.02))
+      const rest = targeted - pending - sent - failed
       const read = Math.round(rest * (fresh ? 0.2 : 0.55 + rnd() * 0.25))
-      runs.push({ msg, event, at, targeted, skipped, submitted, pending, sent, failed, read, delivered: rest - read })
+      runs.push({ msg, event, at, targeted, pending, sent, failed, read, delivered: rest - read })
     }
     add('2b', 10, 0)
     EVENTS.forEach((e, i) => { if (rnd() < 0.14) add('upd', 9 + i * 4, Math.floor(rnd() * 55), e.value) })
   }
   runs.sort((a, b) => b.at - a.at)
-  runs.forEach((r, i) => { r.id = `WR-${200 - i}`; r.rate = r.submitted ? Math.round(((r.delivered + r.read) / r.submitted) * 100) : 0 })
+  runs.forEach((r, i) => { r.id = `WR-${200 - i}`; r.rate = r.targeted ? Math.round(((r.delivered + r.read) / r.targeted) * 100) : 0 })
   return runs
 }
 const RUNS = makeRuns()
@@ -72,7 +69,7 @@ const RUNS = makeRuns()
 export function runMessages(run) {
   const rnd = seeded(run.id.split('-')[1] * 97)
   const list = []
-  for (const [status, n] of [['read', run.read], ['delivered', run.delivered], ['pending', run.pending], ['sent', run.sent], ['failed', run.failed], ['skipped', run.skipped]]) {
+  for (const [status, n] of [['read', run.read], ['delivered', run.delivered], ['pending', run.pending], ['sent', run.sent], ['failed', run.failed]]) {
     for (let i = 0; i < n; i++) list.push(status)
   }
   for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [list[i], list[j]] = [list[j], list[i]] }
@@ -83,9 +80,9 @@ export function runMessages(run) {
     const delivered = status === 'delivered' || status === 'read' ? new Date(sentAt.getTime() + 2000 + rnd() * 90e3) : null
     return {
       id: `${run.id}-${i + 1}`, client, gstin, mobile: mobile || '98250 00000', status,
-      sentAt: status === 'skipped' ? null : sentAt, deliveredAt: delivered,
+      sentAt, deliveredAt: delivered,
       readAt: status === 'read' ? new Date(delivered.getTime() + 60e3 + rnd() * 5 * 3600e3) : null,
-      reason: status === 'failed' ? REASONS[Math.floor(rnd() * REASONS.length)] : status === 'skipped' ? 'No valid WhatsApp number' : '',
+      reason: status === 'failed' ? REASONS[Math.floor(rnd() * REASONS.length)] : '',
     }
   })
 }
@@ -107,6 +104,19 @@ const SINGLES = (() => {
 let singleSeq = 501
 export function addSingleLog({ client, gstin, mobile, event }) {
   SINGLES.unshift({ id: `WS-${singleSeq++}`, client, gstin, mobile, event, by: 'You', status: 'pending', sentAt: new Date(), deliveredAt: null, readAt: null, reason: '' })
+}
+
+// The next scheduled 2B Report: when it runs, and how many clients it will target right now.
+// The settings page keeps the number up to date (clients whose 2B Report switch is on and who have a mobile number).
+let upcoming = { targeted: null }
+const listeners = new Set()
+export const setUpcomingTargets = (n) => { if (upcoming.targeted !== n) { upcoming = { targeted: n }; listeners.forEach((f) => f()) } }
+export const subscribeUpcoming = (f) => { listeners.add(f); return () => listeners.delete(f) }
+export const getUpcoming = () => upcoming
+export function nextRunAt() {
+  const d = new Date(); d.setHours(10, 0, 0, 0)
+  if (d <= new Date()) d.setDate(d.getDate() + 1)
+  return d
 }
 
 // Stand-ins for the real endpoints

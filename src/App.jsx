@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import useSettings from './hooks/useSettings.js'
 import { KEYS, TABS, fullName } from './api/mockData.js'
 import { sendNow } from './api/settings.js'
-import { addSingleLog } from './api/whatsappLogs.js'
+import { addSingleLog, setUpcomingTargets } from './api/whatsappLogs.js'
 import WhatsAppLogs from './components/WhatsAppLogs.jsx'
 import { Icon, FilterButton, Pager, ChannelIcon, useToast } from './components/ui.jsx'
 import SettingsTable from './components/SettingsTable.jsx'
@@ -41,6 +41,10 @@ function SettingsPage() {
   const say = (msg) => { last.current = { msg: msg.endsWith('.') ? msg : '', at: Date.now() }; show(msg) }
 
   const clients = s.state?.clients ?? []
+  // tell the WhatsApp Logs page how many clients the next scheduled 2B Report will target
+  useEffect(() => {
+    if (s.state) setUpcomingTargets(s.state.clients.filter((c) => c.v.w2b && c.mobile).length)
+  }, [s.state])
   const keys = KEYS.filter((x) => x.tab === tab)
 
   const matchStat = {
@@ -62,7 +66,8 @@ function SettingsPage() {
 
   const count = (fn) => clients.filter(fn).length
   const regOptions = [{ value: 'all', label: 'All types', count: clients.length },
-    ...['Regular', 'Composition'].map((t) => ({ value: t, label: t, count: count((c) => c.type === t) }))]
+    // one choice for every registration type that exists in the data, not a fixed list
+    ...[...new Set(clients.map((c) => c.type))].sort().map((t) => ({ value: t, label: t, count: count((c) => c.type === t) }))]
   const statOptions = [
     ['all', 'All clients'], ['on', 'Something turned on'], ['off', 'All turned off'], ['miss', 'Missing email or mobile'],
   ].map(([value, label]) => ({ value, label, count: count(matchStat[value]) }))

@@ -8,7 +8,7 @@ Only messages sent from the Client Communication Settings page are logged.
 
 - **Bulk messages:** anything that goes to everyone at a scheduled time: the **2B Report**, and any update
   notification that is sent to all clients together at a set time (demo: "GSTR-2B data updated", "Return due date
-  reminder"). One run = one go at it. Targeted, submitted and status numbers are kept per run.
+  reminder"). One run = one go at it. Targeted and the status numbers are kept per run.
 - **Single messages:** anything that goes to one client when something happens or is completed: the Send button,
   update alerts for one client, and messages the GST app sends when a task is completed.
 
@@ -25,7 +25,6 @@ The domain / dev team must give the real list of events and the plain-words name
 | Trigger event (2B Report, or the name of the event) | KDK knows which one it started |
 | Run at | When KDK started the run |
 | **Targeted** | Number of clients whose switch was on when the run started. Must be saved at that moment, because switches change later |
-| **Skipped** (and its reason) | Clients targeted but not sent, for example no valid WhatsApp number. KDK decides this before calling Rampwin |
 | Sent by (Send button only) | The user who clicked. Messages sent by the system show "System" |
 | Client name, mobile no. | From Client Master at the time of sending |
 
@@ -71,7 +70,6 @@ Rampwin has its own statuses (Message History screen: Send Status `PENDING` / `S
 | Delivered | `delivered` | Reached the client's phone (two ticks) |
 | Read | `read` | The client opened the message (blue ticks) |
 | Failed | `failed` | Could not be sent or delivered. Comes with an error code and text |
-| Skipped | (ours, not a WhatsApp status) | Not sent to Rampwin, for example no valid WhatsApp number |
 
 Things to handle:
 
@@ -80,8 +78,7 @@ Things to handle:
 - Webhooks can arrive in any order (for example `delivered` after `failed`). Do not rely on the order.
 - Rampwin may add its own statuses (for example queued or accepted). Map them when we get its documentation.
 
-Numbers on the run page always add up: Targeted = Submitted + Skipped, and
-Submitted = Sent + Delivered + Read + Failed.
+Numbers on the run page always add up: Targeted = Pending + Sent + Delivered + Read + Failed.
 
 ## Proposed mapping from Rampwin to the page (to confirm)
 
@@ -93,7 +90,6 @@ Submitted = Sent + Delivered + Read + Failed.
 | Read Status `VIEWED` | Read |
 | Send Status `FAILED` | Failed (with the reason) |
 | Send Status `NOT_ON_WHATSAPP` | Failed, reason "Number is not on WhatsApp" |
-| (our own check, never sent to Rampwin) | Skipped, for example no mobile number |
 
 Note: the page used "Pending" earlier and was renamed "Sent" to match Meta's names. Rampwin has both `PENDING` and
 `SENT`, so "Pending" should probably come back as a separate status.
